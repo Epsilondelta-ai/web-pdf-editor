@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web PPT Editor</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="app-panel">
+        <div>
+          <h1>ONLYOFFICE-inspired Web PPT Editor</h1>
+          <p>
+            Uses a layered approach: PPTX provides editable semantic regions, and an optional PDF preview provides
+            high-fidelity slide rendering.
+          </p>
+        </div>
+
+        <button id="load-sample">Load local sample/ assets</button>
+
+        <label>
+          PPTX file
+          <input id="pptx-input" type="file" accept=".ppt,.pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+        </label>
+
+        <label>
+          Optional PDF preview
+          <input id="pdf-input" type="file" accept="application/pdf" />
+        </label>
+
+        <label>
+          <input id="show-overlay-frames" type="checkbox" />
+          Show editable overlays
+        </label>
+
+        <button id="export-pptx" class="secondary">Export edited PPTX</button>
+
+        <div id="status" class="status">Booting…</div>
+
+        <ul>
+          <li>Double-click a text area to edit.</li>
+          <li>Drag text or image overlays to move them.</li>
+          <li>Keep sample/ local only; it is gitignored.</li>
+        </ul>
+      </aside>
+      <main class="viewer-shell">
+        <div id="viewer"></div>
+      </main>
+    </div>
+    <script type="module" src="/src/demo.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "web-ppt-editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test": "npm run test:e2e",
+    "test:visual:artifacts": "node scripts/generate-visual-artifacts.mjs",
+    "test:visual:llm": "node scripts/run-visual-llm-review.mjs",
+    "test:visual": "npm run test:visual:artifacts && npm run test:visual:llm"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "pdfjs-dist": "^5.4.296"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3"
+  }
+}

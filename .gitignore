@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+dist/
+playwright-report/
+test-results/
+coverage/
+sample/
+.omx/
+.omc/
