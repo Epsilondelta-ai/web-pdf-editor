@@ -9,9 +9,11 @@ const pptxInput = document.querySelector<HTMLInputElement>('#pptx-input');
 const pdfInput = document.querySelector<HTMLInputElement>('#pdf-input');
 const overlayToggle = document.querySelector<HTMLInputElement>('#show-overlay-frames');
 const exportButton = document.querySelector<HTMLButtonElement>('#export-pptx');
+const initialDeck = new URL(window.location.href).searchParams.get('deck') ?? 'sample1';
 
 let editor: PptEditor | null = null;
 let lastExportUrl: string | null = null;
+let currentDeck = initialDeck;
 
 function setStatus(message: string): void {
   if (status) status.textContent = message;
@@ -38,6 +40,7 @@ async function mountEditor(pptx: ArrayBuffer, pdf?: ArrayBuffer, previewImages?:
   editor.mount(viewer);
   (window as typeof window & { __PPT_EDITOR__?: PptEditor; __PPT_DEBUG__?: unknown }).__PPT_EDITOR__ = editor;
   (window as typeof window & { __PPT_EDITOR__?: PptEditor; __PPT_DEBUG__?: unknown }).__PPT_DEBUG__ = {
+    deck: currentDeck,
     slideCount: editor.model.slides.length,
     previewCount: editor.model.preview?.slides.length ?? 0,
     previewType: editor.model.preview?.type ?? 'none',
@@ -53,24 +56,24 @@ async function mountEditor(pptx: ArrayBuffer, pdf?: ArrayBuffer, previewImages?:
 async function fetchBinary(path: string): Promise<ArrayBuffer | undefined> {
   const response = await fetch(path);
   if (!response.ok) return undefined;
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('text/html')) return undefined;
   return response.arrayBuffer();
 }
 
-async function loadBundledSample(): Promise<void> {
-  setStatus('Loading sample assets...');
+async function loadBundledSample(deckName = currentDeck): Promise<void> {
+  currentDeck = deckName;
+  setStatus(`Loading ${deckName} assets...`);
   const [pptx, pdf, ...jpegPreviews] = await Promise.all([
-    fetchBinary('/sample/sample.pptx'),
-    fetchBinary('/sample/sample.pdf'),
-    fetchBinary('/sample/sample.001.jpeg'),
-    fetchBinary('/sample/sample.002.jpeg'),
-    fetchBinary('/sample/sample.003.jpeg'),
-    fetchBinary('/sample/sample.004.jpeg')
+    fetchBinary(`/sample/${deckName}.pptx`),
+    fetchBinary(`/sample/${deckName}.pdf`),
+    ...Array.from({ length: 20 }, (_, index) => fetchBinary(`/sample/${deckName}.${String(index + 1).padStart(3, '0')}.jpeg`))
   ]);
   if (!pptx) {
-    setStatus('sample/sample.pptx not found. Keep sample/ local only; tests will skip when absent.');
+    setStatus(`sample/${deckName}.pptx not found. Keep sample/ local only; tests will skip when absent.`);
     return;
   }
-  const previewImages = jpegPreviews.every(Boolean) ? (jpegPreviews as ArrayBuffer[]) : undefined;
+  const previewImages = jpegPreviews.filter(Boolean) as ArrayBuffer[];
   await mountEditor(pptx, pdf, previewImages);
 }
 
@@ -81,7 +84,7 @@ async function exportCurrentPptx(): Promise<void> {
   lastExportUrl = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = lastExportUrl;
-  link.download = 'edited-sample.pptx';
+  link.download = `edited-${currentDeck}.pptx`;
   link.click();
 
   const zip = await JSZip.loadAsync(await blob.arrayBuffer());
@@ -96,18 +99,7 @@ sampleButton?.addEventListener('click', () => {
 
 overlayToggle?.addEventListener('change', async () => {
   if (!editor) return;
-  const [pptx, pdf, ...jpegPreviews] = await Promise.all([
-    fetchBinary('/sample/sample.pptx'),
-    fetchBinary('/sample/sample.pdf'),
-    fetchBinary('/sample/sample.001.jpeg'),
-    fetchBinary('/sample/sample.002.jpeg'),
-    fetchBinary('/sample/sample.003.jpeg'),
-    fetchBinary('/sample/sample.004.jpeg')
-  ]);
-  if (pptx) {
-    const previewImages = jpegPreviews.every(Boolean) ? (jpegPreviews as ArrayBuffer[]) : undefined;
-    await mountEditor(pptx, pdf, previewImages);
-  }
+  await loadBundledSample(currentDeck);
 });
 
 pptxInput?.addEventListener('change', async () => {
@@ -128,4 +120,4 @@ exportButton?.addEventListener('click', () => {
   void exportCurrentPptx();
 });
 
-void loadBundledSample();
+void loadBundledSample(initialDeck);

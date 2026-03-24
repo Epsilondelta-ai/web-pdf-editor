@@ -3,7 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const sampleDir = process.env.PPT_SAMPLE_DIR ?? path.resolve(process.cwd(), 'sample');
-const hasSamples = fs.existsSync(path.join(sampleDir, 'sample.pptx'));
+const hasSamples =
+  fs.existsSync(sampleDir) &&
+  fs.readdirSync(sampleDir, { withFileTypes: true }).some((entry) => entry.isFile() && entry.name.endsWith('.pptx'));
 
 export default defineConfig({
   testDir: './tests/e2e',

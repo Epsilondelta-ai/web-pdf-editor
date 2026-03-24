@@ -1,4 +1,20 @@
 import { expect, test } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const sampleDir = path.resolve(process.cwd(), 'sample');
+const sampleDecks = fs
+  .readdirSync(sampleDir)
+  .filter((name) => name.endsWith('.pptx'))
+  .map((name) => name.replace(/\.pptx$/i, ''))
+  .sort();
+
+function referenceImagesFor(deck: string): string[] {
+  return fs
+    .readdirSync(sampleDir)
+    .filter((name) => new RegExp(`^${deck}\\.\\d{3}\\.jpeg$`, 'i').test(name))
+    .sort();
+}
 
 async function compareWithReference(page: import('@playwright/test').Page, pngBuffer: Buffer, referencePath: string) {
   return page.evaluate(
@@ -55,27 +71,56 @@ async function compareWithReference(page: import('@playwright/test').Page, pngBu
   );
 }
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-  await expect.poll(() => page.evaluate(() => (window as typeof window & { __PPT_DEBUG__?: { slideCount: number } }).__PPT_DEBUG__?.slideCount ?? 0)).toBe(4);
-});
+for (const deck of sampleDecks) {
+  const references = referenceImagesFor(deck);
 
-test('renders the sample deck against exported references', async ({ page }) => {
-  const debug = await page.evaluate(() => (window as typeof window & { __PPT_DEBUG__?: { slideCount: number; previewCount: number } }).__PPT_DEBUG__);
-  expect(debug?.slideCount).toBe(4);
-  expect(debug?.previewCount).toBe(4);
+  test.describe(`render ${deck}`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto(`/?deck=${deck}`);
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            (window as typeof window & { __PPT_DEBUG__?: { deck: string; slideCount: number } }).__PPT_DEBUG__ ?? null
+          )
+        )
+        .toMatchObject({ deck, slideCount: references.length });
+    });
 
-  for (const index of [1, 2, 3, 4]) {
-    const slide = page.locator(`.ppt-slide[data-slide-index="${index}"] .ppt-slide__preview`);
-    await expect(slide).toBeVisible();
-    const screenshot = await slide.screenshot();
-    const comparison = await compareWithReference(page, screenshot, `/sample/sample.${String(index).padStart(3, '0')}.jpeg`);
-    expect(comparison.avgChannelDelta, `slide ${index} average delta`).toBeLessThan(18);
-    expect(comparison.mismatchRatio, `slide ${index} mismatch ratio`).toBeLessThan(0.18);
-  }
-});
+    test(`${deck} matches exported references`, async ({ page }) => {
+      const debug = await page.evaluate(
+        () =>
+          (window as typeof window & {
+            __PPT_DEBUG__?: { deck: string; slideCount: number; previewCount: number; previewType: string };
+          }).__PPT_DEBUG__
+      );
+      expect(debug?.deck).toBe(deck);
+      expect(debug?.slideCount).toBe(references.length);
+      expect(debug?.previewCount).toBe(references.length);
+      expect(debug?.previewType).toBe('images');
 
-test('edits text and exports the updated pptx xml', async ({ page }) => {
+      for (const [index, reference] of references.entries()) {
+        const slideNumber = index + 1;
+        const slide = page.locator(`.ppt-slide[data-slide-index="${slideNumber}"] .ppt-slide__preview`);
+        await expect(slide).toBeVisible();
+        const screenshot = await slide.screenshot();
+        const comparison = await compareWithReference(page, screenshot, `/sample/${reference}`);
+        expect(comparison.avgChannelDelta, `${deck} slide ${slideNumber} average delta`).toBeLessThan(18);
+        expect(comparison.mismatchRatio, `${deck} slide ${slideNumber} mismatch ratio`).toBeLessThan(0.18);
+      }
+    });
+  });
+}
+
+test('sample1 edits text and exports the updated pptx xml', async ({ page }) => {
+  await page.goto('/?deck=sample1');
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (window as typeof window & { __PPT_DEBUG__?: { deck: string; slideCount: number } }).__PPT_DEBUG__ ?? null
+      )
+    )
+    .toMatchObject({ deck: 'sample1', slideCount: 4 });
+
   const mutation = await page.evaluate(() => {
     const editor = (window as typeof window & { __PPT_EDITOR__: import('../../src').PptEditor }).__PPT_EDITOR__;
     const slide = editor.model.slides[1];
@@ -89,7 +134,9 @@ test('edits text and exports the updated pptx xml', async ({ page }) => {
   });
 
   await page.getByRole('button', { name: 'Export edited PPTX' }).click();
-  await expect.poll(() => page.evaluate(() => (window as typeof window & { __LAST_EXPORTED_XML__?: string }).__LAST_EXPORTED_XML__ ?? '')).toContain('E2E edited title');
+  await expect
+    .poll(() => page.evaluate(() => (window as typeof window & { __LAST_EXPORTED_XML__?: string }).__LAST_EXPORTED_XML__ ?? ''))
+    .toContain('E2E edited title');
 
   const exportedXml = await page.evaluate(() => (window as typeof window & { __LAST_EXPORTED_XML__?: string }).__LAST_EXPORTED_XML__ ?? '');
   expect(exportedXml).toContain('E2E edited title');
