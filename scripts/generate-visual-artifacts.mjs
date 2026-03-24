@@ -8,6 +8,10 @@ const sampleDir = path.resolve(rootDir, 'sample');
 const outputDir = path.resolve(rootDir, 'test-results/visual-review');
 const port = Number(process.env.VISUAL_PORT ?? 4173);
 const baseUrl = process.env.VISUAL_BASE_URL ?? `http://127.0.0.1:${port}`;
+const deckFilter = process.env.VISUAL_DECK_FILTER
+  ?.split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 async function exists(filePath) {
   try {
@@ -20,10 +24,11 @@ async function exists(filePath) {
 
 async function listDecks() {
   const entries = await fs.readdir(sampleDir, { withFileTypes: true });
-  return entries
+  const decks = entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.pptx'))
     .map((entry) => entry.name.replace(/\.pptx$/i, ''))
     .sort();
+  return deckFilter?.length ? decks.filter((deck) => deckFilter.includes(deck)) : decks;
 }
 
 async function listReferenceImages(deck) {

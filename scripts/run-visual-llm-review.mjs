@@ -9,6 +9,10 @@ const visualDir = path.resolve(rootDir, 'test-results/visual-review');
 const artifactDir = path.resolve(rootDir, '.omx/artifacts');
 const verdictStatePath = path.resolve(rootDir, '.omx/state/visual-review/ralph-progress.json');
 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const deckFilter = process.env.VISUAL_DECK_FILTER
+  ?.split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 function extractJsonBlock(raw) {
   const fenced = raw.match(/```json\s*([\s\S]*?)```/i);
@@ -45,7 +49,8 @@ async function deckSummaries() {
       decks.push({ deck: entry.name, slides: parsed });
     } catch {}
   }
-  return decks.sort((a, b) => a.deck.localeCompare(b.deck));
+  const sorted = decks.sort((a, b) => a.deck.localeCompare(b.deck));
+  return deckFilter?.length ? sorted.filter((deck) => deckFilter.includes(deck.deck)) : sorted;
 }
 
 async function reviewSlide(deck, slide) {

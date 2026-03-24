@@ -61,20 +61,32 @@ async function fetchBinary(path: string): Promise<ArrayBuffer | undefined> {
   return response.arrayBuffer();
 }
 
+async function fetchDeckPreviewImages(deckName: string, maxImages = 200): Promise<ArrayBuffer[]> {
+  const images: ArrayBuffer[] = [];
+  for (let index = 1; index <= maxImages; index += 1) {
+    const image = await fetchBinary(`/sample/${deckName}.${String(index).padStart(3, '0')}.jpeg`);
+    if (!image) {
+      if (images.length > 0) break;
+      continue;
+    }
+    images.push(image);
+  }
+  return images;
+}
+
 async function loadBundledSample(deckName = currentDeck): Promise<void> {
   currentDeck = deckName;
   setStatus(`Loading ${deckName} assets...`);
-  const [pptx, pdf, ...jpegPreviews] = await Promise.all([
+  const [pptx, pdf, jpegPreviews] = await Promise.all([
     fetchBinary(`/sample/${deckName}.pptx`),
     fetchBinary(`/sample/${deckName}.pdf`),
-    ...Array.from({ length: 20 }, (_, index) => fetchBinary(`/sample/${deckName}.${String(index + 1).padStart(3, '0')}.jpeg`))
+    fetchDeckPreviewImages(deckName)
   ]);
   if (!pptx) {
     setStatus(`sample/${deckName}.pptx not found. Keep sample/ local only; tests will skip when absent.`);
     return;
   }
-  const previewImages = jpegPreviews.filter(Boolean) as ArrayBuffer[];
-  await mountEditor(pptx, pdf, previewImages);
+  await mountEditor(pptx, pdf, jpegPreviews);
 }
 
 async function exportCurrentPptx(): Promise<void> {
