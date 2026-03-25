@@ -1,8 +1,7 @@
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import type { PreviewDocument } from './types';
 
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
 
 async function imageDataUrlFromArrayBuffer(buffer: ArrayBuffer): Promise<{ width: number; height: number; dataUrl: string }> {
   const blob = new Blob([buffer]);

@@ -1,11 +1,31 @@
 {
   "name": "web-ppt-editor",
   "version": "0.1.0",
-  "private": true,
+  "description": "Browser PPTX viewer library with optional PDF/image previews.",
   "type": "module",
+  "main": "./dist/web-ppt-editor.umd.cjs",
+  "module": "./dist/web-ppt-editor.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/web-ppt-editor.js",
+      "require": "./dist/web-ppt-editor.umd.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
+    "clean": "node -e \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\"",
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
+    "build:js": "vite build",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build:assets": "node scripts/copy-package-assets.mjs",
+    "build": "npm run clean && npm run build:js && npm run build:types && npm run build:assets",
     "preview": "vite preview --host 127.0.0.1",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
@@ -13,7 +33,8 @@
     "test": "npm run test:e2e",
     "test:visual:artifacts": "node scripts/generate-visual-artifacts.mjs",
     "test:visual:llm": "node scripts/run-visual-llm-review.mjs",
-    "test:visual": "npm run test:visual:artifacts && npm run test:visual:llm"
+    "test:visual": "npm run test:visual:artifacts && npm run test:visual:llm",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "jszip": "^3.10.1",
