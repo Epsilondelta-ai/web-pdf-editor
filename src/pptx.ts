@@ -18,12 +18,6 @@ interface FlatTransform {
   ty: number;
 }
 
-export interface LoadedPresentation {
-  model: PresentationModel;
-  zip: JSZip;
-  slideXmlDocs: Map<string, XMLDocument>;
-}
-
 function parseXml(source: string): XMLDocument {
   return new DOMParser().parseFromString(source, 'application/xml');
 }
@@ -328,7 +322,8 @@ async function readImageAssets(zip: JSZip): Promise<Map<string, { dataUrl: strin
   return assets;
 }
 
-async function parsePresentation(pptx: ArrayBuffer): Promise<LoadedPresentation> {
+export async function loadPresentationModel(options: LoadPresentationOptions): Promise<PresentationModel> {
+  const pptx = options.pptx;
   const zip = await JSZip.loadAsync(pptx);
   const presentationXml = await zip.file('ppt/presentation.xml')?.async('string');
   const presentationRelsXml = await zip.file('ppt/_rels/presentation.xml.rels')?.async('string');
@@ -344,7 +339,6 @@ async function parsePresentation(pptx: ArrayBuffer): Promise<LoadedPresentation>
   const imageAssets = await readImageAssets(zip);
 
   const slides: SlideModel[] = [];
-  const slideXmlDocs = new Map<string, XMLDocument>();
 
   for (const [index, slideRef] of slideRefs.entries()) {
     const rId = slideRef.getAttributeNS(NS.r, 'id') ?? slideRef.getAttribute('r:id');
@@ -354,7 +348,6 @@ async function parsePresentation(pptx: ArrayBuffer): Promise<LoadedPresentation>
     const slideXml = await zip.file(slidePath)?.async('string');
     if (!slideXml) continue;
     const slideDoc = parseXml(slideXml);
-    slideXmlDocs.set(slidePath, slideDoc);
 
     const slideRelsXml = await zip.file(relsPathFor(slidePath))?.async('string');
     const slideRels = slideRelsXml ? mapRelationships(parseXml(slideRelsXml), slidePath) : new Map<string, string>();
@@ -373,19 +366,11 @@ async function parsePresentation(pptx: ArrayBuffer): Promise<LoadedPresentation>
   }
 
   return {
-    model: {
-      size: {
-        cx: attrNumber(slideSize, 'cx', 10 * EMUS_PER_INCH),
-        cy: attrNumber(slideSize, 'cy', 5.625 * EMUS_PER_INCH)
-      },
-      slides,
-      imageAssets
+    size: {
+      cx: attrNumber(slideSize, 'cx', 10 * EMUS_PER_INCH),
+      cy: attrNumber(slideSize, 'cy', 5.625 * EMUS_PER_INCH)
     },
-    zip,
-    slideXmlDocs
+    slides,
+    imageAssets
   };
-}
-
-export async function loadPresentation(options: LoadPresentationOptions): Promise<LoadedPresentation> {
-  return parsePresentation(options.pptx);
 }

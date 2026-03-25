@@ -57,13 +57,9 @@ Clears the mounted DOM.
 
 Parsed presentation model containing slide metadata, text nodes, image nodes, and shapes.
 
-### `loadPresentation(options)`
-
-Lower-level parser that loads the same data model without mounting DOM immediately.
-
 ## Runtime notes
 
-- Browser-only library. It depends on DOM APIs such as `DOMParser`, `Image`, `FileReader`, and `canvas`.
+- Browser-only library. It depends on DOM APIs such as `DOMParser` and standard HTML rendering primitives.
 - SSR and pure Node.js execution are not supported.
 - The library renders text, images, and basic shapes directly from PPTX OOXML data.
 

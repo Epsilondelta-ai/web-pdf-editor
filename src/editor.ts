@@ -1,4 +1,4 @@
-import { loadPresentation, type LoadedPresentation } from './pptx';
+import { loadPresentationModel } from './pptx';
 import type { LoadPresentationOptions, PresentationModel, RenderOptions, SlideNode, TextNode, ViewerApi } from './types';
 
 function emuToPx(value: number, slideExtent: number, pixelExtent: number): number {
@@ -11,8 +11,8 @@ export class PptViewer implements ViewerApi {
   private readonly options: Required<RenderOptions>;
   private container: HTMLElement | null = null;
 
-  constructor(loaded: LoadedPresentation, options: RenderOptions = {}) {
-    this.model = loaded.model;
+  constructor(model: PresentationModel, options: RenderOptions = {}) {
+    this.model = model;
     this.options = {
       slidePixelWidth: options.slidePixelWidth ?? 1280
     };
@@ -124,6 +124,6 @@ export class PptViewer implements ViewerApi {
 }
 
 export async function createPptViewer(options: LoadPresentationOptions, renderOptions?: RenderOptions): Promise<PptViewer> {
-  const loaded = await loadPresentation(options);
-  return new PptViewer(loaded, renderOptions);
+  const model = await loadPresentationModel(options);
+  return new PptViewer(model, renderOptions);
 }
