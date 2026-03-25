@@ -76,8 +76,7 @@ Lower-level parser that loads the same data model without mounting DOM immediate
 
 ```bash
 npm install
-npm run dev
 npm run build
-npm run lint
-npm test
+npm run typecheck
+npm pack --dry-run
 ```

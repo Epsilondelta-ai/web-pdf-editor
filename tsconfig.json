@@ -13,7 +13,7 @@
     "noEmit": true,
     "strict": true,
     "baseUrl": ".",
-    "types": ["vite/client", "node"]
+    "types": ["node"]
   },
-  "include": ["src", "playwright.config.ts", "tests"]
+  "include": ["src", "scripts", "vite.config.ts", "tsconfig.build.json"]
 }

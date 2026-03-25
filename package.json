@@ -21,19 +21,11 @@
   ],
   "scripts": {
     "clean": "node -e \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\"",
-    "dev": "vite --host 127.0.0.1",
     "build:js": "vite build",
     "build:types": "tsc -p tsconfig.build.json",
     "build:assets": "node scripts/copy-package-assets.mjs",
     "build": "npm run clean && npm run build:js && npm run build:types && npm run build:assets",
-    "preview": "vite preview --host 127.0.0.1",
-    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test",
-    "test": "npm run test:e2e",
-    "test:visual:artifacts": "node scripts/generate-visual-artifacts.mjs",
-    "test:visual:llm": "node scripts/run-visual-llm-review.mjs",
-    "test:visual": "npm run test:visual:artifacts && npm run test:visual:llm",
     "prepack": "npm run build"
   },
   "dependencies": {
@@ -41,7 +33,6 @@
     "pdfjs-dist": "^5.4.296"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.0",
     "@types/node": "^25.5.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.3"
