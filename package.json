@@ -1,7 +1,7 @@
 {
   "name": "web-ppt-editor",
   "version": "0.1.0",
-  "description": "Browser PPTX viewer library with optional PDF/image previews.",
+  "description": "Browser PPTX viewer library with optional image previews.",
   "type": "module",
   "main": "./dist/web-ppt-editor.umd.cjs",
   "module": "./dist/web-ppt-editor.js",
@@ -29,8 +29,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "jszip": "^3.10.1",
-    "pdfjs-dist": "^5.4.296"
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

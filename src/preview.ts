@@ -1,7 +1,4 @@
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import type { PreviewDocument } from './types';
-
-GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
 
 async function imageDataUrlFromArrayBuffer(buffer: ArrayBuffer): Promise<{ width: number; height: number; dataUrl: string }> {
   const blob = new Blob([buffer]);
@@ -30,32 +27,4 @@ export async function renderPreviewImages(images: ArrayBuffer[]): Promise<Previe
     })
   );
   return { type: 'images', slides };
-}
-
-export async function renderPdfPreview(pdfBuffer: ArrayBuffer, targetWidth = 1750): Promise<PreviewDocument> {
-  const pdf = await getDocument({ data: pdfBuffer }).promise;
-  const slides = [] as PreviewDocument['slides'];
-
-  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-    const page = await pdf.getPage(pageNumber);
-    const baseViewport = page.getViewport({ scale: 1 });
-    const scale = targetWidth / baseViewport.width;
-    const viewport = page.getViewport({ scale });
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    if (!context) {
-      throw new Error('2D canvas context is unavailable.');
-    }
-    canvas.width = Math.round(viewport.width);
-    canvas.height = Math.round(viewport.height);
-    await page.render({ canvas, canvasContext: context, viewport }).promise;
-    slides.push({
-      index: pageNumber,
-      width: canvas.width,
-      height: canvas.height,
-      dataUrl: canvas.toDataURL('image/png')
-    });
-  }
-
-  return { type: 'pdf', slides };
 }

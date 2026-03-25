@@ -69,7 +69,7 @@ export interface PreviewSlide {
 }
 
 export interface PreviewDocument {
-  type: 'pdf' | 'images';
+  type: 'images';
   slides: PreviewSlide[];
 }
 
@@ -82,7 +82,6 @@ export interface PresentationModel {
 
 export interface LoadPresentationOptions {
   pptx: ArrayBuffer;
-  previewPdf?: ArrayBuffer;
   previewImages?: ArrayBuffer[];
 }
 

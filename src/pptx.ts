@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import type { ImageNode, LoadPresentationOptions, PresentationModel, PreviewDocument, ShapeNode, SlideFrame, SlideModel, SlideNode, TextNode, TextStyle } from './types';
-import { renderPdfPreview, renderPreviewImages } from './preview';
+import { renderPreviewImages } from './preview';
 
 const NS = {
   a: 'http://schemas.openxmlformats.org/drawingml/2006/main',
@@ -389,11 +389,6 @@ async function parsePresentation(pptx: ArrayBuffer, preview?: PreviewDocument): 
 }
 
 export async function loadPresentation(options: LoadPresentationOptions): Promise<LoadedPresentation> {
-  let preview: PreviewDocument | undefined;
-  if (options.previewPdf) {
-    preview = await renderPdfPreview(options.previewPdf);
-  } else if (options.previewImages?.length) {
-    preview = await renderPreviewImages(options.previewImages);
-  }
+  const preview: PreviewDocument | undefined = options.previewImages?.length ? await renderPreviewImages(options.previewImages) : undefined;
   return parsePresentation(options.pptx, preview);
 }
