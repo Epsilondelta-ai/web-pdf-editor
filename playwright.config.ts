@@ -1,11 +1,4 @@
 import { defineConfig } from '@playwright/test';
-import fs from 'node:fs';
-import path from 'node:path';
-
-const sampleDir = process.env.PPT_SAMPLE_DIR ?? path.resolve(process.cwd(), 'sample');
-const hasSamples =
-  fs.existsSync(sampleDir) &&
-  fs.readdirSync(sampleDir, { withFileTypes: true }).some((entry) => entry.isFile() && entry.name.endsWith('.pptx'));
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -25,6 +18,5 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000
   },
-  reporter: [['list']],
-  grepInvert: hasSamples ? undefined : /./
+  reporter: [['list']]
 });

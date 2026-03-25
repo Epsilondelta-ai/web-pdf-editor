@@ -57,11 +57,6 @@ body {
   font-weight: 600;
 }
 
-.app-panel button.secondary {
-  background: #1f2937;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
 .app-panel .status {
   padding: 12px;
   border-radius: 12px;
@@ -75,7 +70,7 @@ body {
   overflow: auto;
 }
 
-.ppt-editor {
+.ppt-viewer {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -91,7 +86,7 @@ body {
 }
 
 .ppt-slide__preview,
-.ppt-slide__overlay {
+.ppt-slide__content {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -107,15 +102,7 @@ body {
 .ppt-node {
   position: absolute;
   overflow: hidden;
-  border: 1px solid transparent;
-  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
-  touch-action: none;
-}
-
-.ppt-node.show-frame,
-.ppt-node.is-selected {
-  border-color: rgba(79, 70, 229, 0.9);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25);
+  pointer-events: none;
 }
 
 .ppt-node--text {
@@ -124,21 +111,10 @@ body {
   justify-content: flex-start;
   padding: 0;
   white-space: pre-wrap;
-  cursor: text;
+  cursor: default;
   line-height: 1.08;
   overflow: visible;
   text-rendering: geometricPrecision;
-}
-
-.ppt-node--text.is-editing {
-  background: rgba(255, 255, 255, 0.92);
-  outline: none;
-  border-color: rgba(79, 70, 229, 0.95);
-}
-
-.ppt-node--ghost {
-  opacity: 0;
-  background: transparent;
 }
 
 .ppt-node--image {

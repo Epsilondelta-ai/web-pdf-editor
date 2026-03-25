@@ -88,15 +88,10 @@ export interface LoadPresentationOptions {
 
 export interface RenderOptions {
   slidePixelWidth?: number;
-  showOverlayFrames?: boolean;
 }
 
-export interface EditorApi {
+export interface ViewerApi {
   model: PresentationModel;
   mount(container: HTMLElement): void;
   destroy(): void;
-  setSelectedNode(nodeId: string | null): void;
-  updateText(nodeId: string, text: string): void;
-  moveNode(nodeId: string, deltaXEmu: number, deltaYEmu: number): void;
-  exportPptx(): Promise<Blob>;
 }

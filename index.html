@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Web PPT Editor</title>
+    <title>Web PPT Viewer</title>
   </head>
   <body>
     <div class="app-shell">
       <aside class="app-panel">
         <div>
-          <h1>ONLYOFFICE-inspired Web PPT Editor</h1>
+          <h1>Browser PPT Viewer</h1>
           <p>
-            Uses a layered approach: PPTX provides editable semantic regions, and an optional PDF preview provides
-            high-fidelity slide rendering.
+            Loads a PPTX in the browser and, when available, uses PDF or JPEG previews for high-fidelity slide
+            rendering.
           </p>
         </div>
 
@@ -28,18 +28,11 @@
           <input id="pdf-input" type="file" accept="application/pdf" />
         </label>
 
-        <label>
-          <input id="show-overlay-frames" type="checkbox" />
-          Show editable overlays
-        </label>
-
-        <button id="export-pptx" class="secondary">Export edited PPTX</button>
-
         <div id="status" class="status">Booting…</div>
 
         <ul>
-          <li>Double-click a text area to edit.</li>
-          <li>Drag text or image overlays to move them.</li>
+          <li>PPTX만 있어도 기본 텍스트, 이미지, 도형 레이아웃을 렌더링합니다.</li>
+          <li>PDF 또는 JPEG 미리보기가 있으면 원본에 가까운 슬라이드 이미지를 사용합니다.</li>
           <li>Keep sample/ local only; it is gitignored.</li>
         </ul>
       </aside>

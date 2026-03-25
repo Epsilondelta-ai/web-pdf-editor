@@ -3,11 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const sampleDir = path.resolve(process.cwd(), 'sample');
-const sampleDecks = fs
-  .readdirSync(sampleDir)
-  .filter((name) => name.endsWith('.pptx'))
-  .map((name) => name.replace(/\.pptx$/i, ''))
-  .sort();
+const sampleDecks = fs.existsSync(sampleDir)
+  ? fs
+      .readdirSync(sampleDir)
+      .filter((name) => name.endsWith('.pptx'))
+      .map((name) => name.replace(/\.pptx$/i, ''))
+      .sort()
+  : [];
 
 function referenceImagesFor(deck: string): string[] {
   return fs
@@ -111,7 +113,8 @@ for (const deck of sampleDecks) {
   });
 }
 
-test('sample1 edits text and exports the updated pptx xml', async ({ page }) => {
+test('sample1 exposes a viewer-only API', async ({ page }) => {
+  test.skip(!sampleDecks.includes('sample1'), 'sample/sample1.pptx fixture not available');
   await page.goto('/?deck=sample1');
   await expect
     .poll(() =>
@@ -121,25 +124,28 @@ test('sample1 edits text and exports the updated pptx xml', async ({ page }) => 
     )
     .toMatchObject({ deck: 'sample1', slideCount: 4 });
 
-  const mutation = await page.evaluate(() => {
-    const editor = (window as typeof window & { __PPT_EDITOR__: import('../../src').PptEditor }).__PPT_EDITOR__;
-    const slide = editor.model.slides[1];
-    const node = slide.nodes.find((candidate) => candidate.kind === 'text' && candidate.text.includes('타이틀'));
-    if (!node || node.kind !== 'text') {
-      throw new Error('Target text node not found');
-    }
-    editor.updateText(node.id, 'E2E edited title');
-    editor.moveNode(node.id, 180000, 120000);
-    return { nodeId: node.id, x: node.frame.x, y: node.frame.y };
+  await expect(page.locator('#show-overlay-frames')).toHaveCount(0);
+  await expect(page.locator('#export-pptx')).toHaveCount(0);
+
+  const apiShape = await page.evaluate(() => {
+    const pptViewer = (window as typeof window & { __PPT_VIEWER__?: import('../../src').PptViewer }).__PPT_VIEWER__;
+    if (!pptViewer) return null;
+    return {
+      hasModel: typeof pptViewer.model === 'object',
+      hasMount: typeof pptViewer.mount === 'function',
+      hasDestroy: typeof pptViewer.destroy === 'function',
+      hasUpdateText: 'updateText' in pptViewer,
+      hasMoveNode: 'moveNode' in pptViewer,
+      hasExportPptx: 'exportPptx' in pptViewer
+    };
   });
 
-  await page.getByRole('button', { name: 'Export edited PPTX' }).click();
-  await expect
-    .poll(() => page.evaluate(() => (window as typeof window & { __LAST_EXPORTED_XML__?: string }).__LAST_EXPORTED_XML__ ?? ''))
-    .toContain('E2E edited title');
-
-  const exportedXml = await page.evaluate(() => (window as typeof window & { __LAST_EXPORTED_XML__?: string }).__LAST_EXPORTED_XML__ ?? '');
-  expect(exportedXml).toContain('E2E edited title');
-  expect(exportedXml).toContain(`x="${Math.round(mutation.x)}"`);
-  expect(exportedXml).toContain(`y="${Math.round(mutation.y)}"`);
+  expect(apiShape).toEqual({
+    hasModel: true,
+    hasMount: true,
+    hasDestroy: true,
+    hasUpdateText: false,
+    hasMoveNode: false,
+    hasExportPptx: false
+  });
 });

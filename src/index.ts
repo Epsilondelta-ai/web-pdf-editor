@@ -1,3 +1,3 @@
-export { createPptEditor, PptEditor } from './editor';
+export { createPptViewer, PptViewer } from './editor';
 export { loadPresentation } from './pptx';
-export type { EditorApi, LoadPresentationOptions, PresentationModel, RenderOptions, SlideModel, SlideNode } from './types';
+export type { LoadPresentationOptions, PresentationModel, RenderOptions, SlideModel, SlideNode, ViewerApi } from './types';

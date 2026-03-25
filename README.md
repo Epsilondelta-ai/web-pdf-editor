@@ -1,14 +1,13 @@
 # web-ppt-editor
 
-A minimal ONLYOFFICE-inspired browser PPT editor prototype.
+A minimal browser PPT viewer prototype.
 
 ## What it does
 
 - Loads `.pptx` files directly in the browser.
 - Parses slide text boxes, images, and basic shape frames from OOXML.
 - Uses an optional exported PDF as a high-fidelity preview layer.
-- Lets you edit text and drag editable overlays on top of slides.
-- Re-exports the edited PPTX with updated text and element positions.
+- Renders semantic slide content directly when no preview asset is available.
 - Provides Playwright e2e coverage that compares rendered slides against exported JPEG references when `sample/` exists locally.
 
 ## Scripts
