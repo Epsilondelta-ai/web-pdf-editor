@@ -61,28 +61,14 @@ export interface SlideModel {
   nodes: SlideNode[];
 }
 
-export interface PreviewSlide {
-  index: number;
-  width: number;
-  height: number;
-  dataUrl: string;
-}
-
-export interface PreviewDocument {
-  type: 'images';
-  slides: PreviewSlide[];
-}
-
 export interface PresentationModel {
   size: { cx: Emu; cy: Emu };
   slides: SlideModel[];
   imageAssets: Map<string, { dataUrl: string; contentType: string }>;
-  preview?: PreviewDocument;
 }
 
 export interface LoadPresentationOptions {
   pptx: ArrayBuffer;
-  previewImages?: ArrayBuffer[];
 }
 
 export interface RenderOptions {

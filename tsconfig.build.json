@@ -8,5 +8,5 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src/editor.ts", "src/index.ts", "src/pptx.ts", "src/preview.ts", "src/types.ts"]
+  "include": ["src/editor.ts", "src/index.ts", "src/pptx.ts", "src/types.ts"]
 }

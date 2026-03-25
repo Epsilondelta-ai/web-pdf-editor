@@ -1,6 +1,6 @@
 # web-ppt-editor
 
-Browser PPTX viewer library with optional image-based slide previews.
+Browser PPTX viewer library.
 
 ## Install
 
@@ -16,9 +16,6 @@ import { createPptViewer } from 'web-ppt-editor';
 
 const container = document.querySelector('#viewer');
 const pptx = await fetch('/slides/deck.pptx').then((response) => response.arrayBuffer());
-const previewImages = await Promise.all(
-  ['/slides/deck.001.jpg', '/slides/deck.002.jpg'].map((path) => fetch(path).then((response) => response.arrayBuffer()))
-);
 
 if (!container) {
   throw new Error('Missing #viewer container');
@@ -26,8 +23,7 @@ if (!container) {
 
 const viewer = await createPptViewer(
   {
-    pptx,
-    previewImages
+    pptx
   },
   {
     slidePixelWidth: 1600
@@ -45,10 +41,9 @@ Creates a browser viewer instance and loads the presentation model.
 
 `options`:
 - `pptx: ArrayBuffer` - required `.pptx` file bytes.
-- `previewImages?: ArrayBuffer[]` - optional per-slide preview images used as the slide preview layer.
 
 `renderOptions`:
-- `slidePixelWidth?: number` - target slide width when no preview asset defines the width.
+- `slidePixelWidth?: number` - target slide width for rendering.
 
 ### `viewer.mount(container)`
 
@@ -60,7 +55,7 @@ Clears the mounted DOM.
 
 ### `viewer.model`
 
-Parsed presentation model containing slide metadata, text nodes, image nodes, shapes, and preview information.
+Parsed presentation model containing slide metadata, text nodes, image nodes, and shapes.
 
 ### `loadPresentation(options)`
 
@@ -70,7 +65,7 @@ Lower-level parser that loads the same data model without mounting DOM immediate
 
 - Browser-only library. It depends on DOM APIs such as `DOMParser`, `Image`, `FileReader`, and `canvas`.
 - SSR and pure Node.js execution are not supported.
-- Without preview assets, the library falls back to semantic PPTX rendering of text, images, and basic shapes.
+- The library renders text, images, and basic shapes directly from PPTX OOXML data.
 
 ## Scripts
 

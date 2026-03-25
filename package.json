@@ -1,7 +1,7 @@
 {
   "name": "web-ppt-editor",
   "version": "0.1.0",
-  "description": "Browser PPTX viewer library with optional image previews.",
+  "description": "Browser PPTX viewer library.",
   "type": "module",
   "main": "./dist/web-ppt-editor.umd.cjs",
   "module": "./dist/web-ppt-editor.js",

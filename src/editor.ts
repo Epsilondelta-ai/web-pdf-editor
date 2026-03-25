@@ -14,7 +14,7 @@ export class PptViewer implements ViewerApi {
   constructor(loaded: LoadedPresentation, options: RenderOptions = {}) {
     this.model = loaded.model;
     this.options = {
-      slidePixelWidth: options.slidePixelWidth ?? loaded.model.preview?.slides[0]?.width ?? 1280
+      slidePixelWidth: options.slidePixelWidth ?? 1280
     };
   }
 
@@ -37,36 +37,24 @@ export class PptViewer implements ViewerApi {
     this.container.innerHTML = '';
 
     for (const slide of this.model.slides) {
-      const previewSlide = this.model.preview?.slides.find((candidate) => candidate.index === slide.index);
-      const width = previewSlide?.width ?? this.options.slidePixelWidth;
-      const height = previewSlide?.height ?? Math.round((width * this.model.size.cy) / this.model.size.cx);
+      const width = this.options.slidePixelWidth;
+      const height = Math.round((width * this.model.size.cy) / this.model.size.cx);
       const slideElement = document.createElement('section');
       slideElement.className = 'ppt-slide';
       slideElement.dataset.slideIndex = String(slide.index);
       slideElement.style.width = `${width}px`;
       slideElement.style.height = `${height}px`;
 
-      if (previewSlide) {
-        const previewImage = document.createElement('img');
-        previewImage.className = 'ppt-slide__preview';
-        previewImage.src = previewSlide.dataUrl;
-        previewImage.alt = `Slide ${slide.index} preview`;
-        previewImage.draggable = false;
-        slideElement.append(previewImage);
-      }
-
       const content = document.createElement('div');
       content.className = 'ppt-slide__content';
       slideElement.append(content);
 
-      if (!previewSlide) {
-        for (const node of slide.nodes) {
-          if (node.kind === 'shape' && node.geometry === 'unsupported') {
-            continue;
-          }
-          const nodeElement = this.createNodeElement(node, width, height);
-          content.append(nodeElement);
+      for (const node of slide.nodes) {
+        if (node.kind === 'shape' && node.geometry === 'unsupported') {
+          continue;
         }
+        const nodeElement = this.createNodeElement(node, width, height);
+        content.append(nodeElement);
       }
 
       this.container.append(slideElement);

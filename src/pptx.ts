@@ -1,6 +1,5 @@
 import JSZip from 'jszip';
-import type { ImageNode, LoadPresentationOptions, PresentationModel, PreviewDocument, ShapeNode, SlideFrame, SlideModel, SlideNode, TextNode, TextStyle } from './types';
-import { renderPreviewImages } from './preview';
+import type { ImageNode, LoadPresentationOptions, PresentationModel, ShapeNode, SlideFrame, SlideModel, SlideNode, TextNode, TextStyle } from './types';
 
 const NS = {
   a: 'http://schemas.openxmlformats.org/drawingml/2006/main',
@@ -329,7 +328,7 @@ async function readImageAssets(zip: JSZip): Promise<Map<string, { dataUrl: strin
   return assets;
 }
 
-async function parsePresentation(pptx: ArrayBuffer, preview?: PreviewDocument): Promise<LoadedPresentation> {
+async function parsePresentation(pptx: ArrayBuffer): Promise<LoadedPresentation> {
   const zip = await JSZip.loadAsync(pptx);
   const presentationXml = await zip.file('ppt/presentation.xml')?.async('string');
   const presentationRelsXml = await zip.file('ppt/_rels/presentation.xml.rels')?.async('string');
@@ -380,8 +379,7 @@ async function parsePresentation(pptx: ArrayBuffer, preview?: PreviewDocument): 
         cy: attrNumber(slideSize, 'cy', 5.625 * EMUS_PER_INCH)
       },
       slides,
-      imageAssets,
-      preview
+      imageAssets
     },
     zip,
     slideXmlDocs
@@ -389,6 +387,5 @@ async function parsePresentation(pptx: ArrayBuffer, preview?: PreviewDocument): 
 }
 
 export async function loadPresentation(options: LoadPresentationOptions): Promise<LoadedPresentation> {
-  const preview: PreviewDocument | undefined = options.previewImages?.length ? await renderPreviewImages(options.previewImages) : undefined;
-  return parsePresentation(options.pptx, preview);
+  return parsePresentation(options.pptx);
 }
